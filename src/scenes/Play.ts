@@ -10,7 +10,7 @@ export default class Play extends Phaser.Scene {
   starfield?: Phaser.GameObjects.TileSprite;
   spinner?: Phaser.GameObjects.Shape;
 
-  rotationSpeed = Phaser.Math.PI2 / 1000; // radians per millisecond
+  moveSpeed = 0.3;
 
   constructor() {
     super("play");
@@ -41,17 +41,17 @@ export default class Play extends Phaser.Scene {
       )
       .setOrigin(0, 0);
 
-    this.spinner = this.add.rectangle(100, 100, 50, 50, 0xff0000);
+    this.spinner = this.add.rectangle(295, 50, 50, 50, 0xff0000);
   }
 
   update(_timeMs: number, delta: number) {
     this.starfield!.tilePositionX -= 4;
 
     if (this.left!.isDown) {
-      this.spinner!.rotation -= delta * this.rotationSpeed;
+      this.spinner!.x -= delta * this.moveSpeed;
     }
     if (this.right!.isDown) {
-      this.spinner!.rotation += delta * this.rotationSpeed;
+      this.spinner!.x += delta * this.moveSpeed;
     }
 
     if (this.fire!.isDown) {
