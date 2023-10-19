@@ -8,9 +8,10 @@ export default class Play extends Phaser.Scene {
   right?: Phaser.Input.Keyboard.Key;
 
   starfield?: Phaser.GameObjects.TileSprite;
-  spinner?: Phaser.GameObjects.Shape;
+  spaceship?: Phaser.GameObjects.Shape;
 
   moveSpeed = 0.3;
+  fired?: boolean;
 
   constructor() {
     super("play");
@@ -41,25 +42,31 @@ export default class Play extends Phaser.Scene {
       )
       .setOrigin(0, 0);
 
-    this.spinner = this.add.rectangle(295, 50, 50, 50, 0xff0000);
+    this.spaceship = this.add.rectangle(295, 450, 50, 50, 0x00bf00);
+    this.fired = false;
   }
 
-  update(_timeMs: number, delta: number) {
+  update(_: number, delta: number) {
     this.starfield!.tilePositionX -= 4;
 
-    if (this.left!.isDown) {
-      this.spinner!.x -= delta * this.moveSpeed;
+    if (this.left!.isDown && !this.fired && this.spaceship!.x > 30) {
+      this.spaceship!.x -= delta * this.moveSpeed;
     }
-    if (this.right!.isDown) {
-      this.spinner!.x += delta * this.moveSpeed;
+    if (this.right!.isDown && !this.fired && this.spaceship!.x < 610) {
+      this.spaceship!.x += delta * this.moveSpeed;
     }
 
-    if (this.fire!.isDown) {
+    if (this.fire!.isDown && !this.fired) {
+      this.fired = true;
       this.tweens.add({
-        targets: this.spinner,
-        scale: { from: 1.5, to: 1 },
-        duration: 300,
-        ease: Phaser.Math.Easing.Sine.Out,
+        targets: this.spaceship,
+        y: { from: 450, to: -25 },
+        duration: 1000,
+        ease: Phaser.Math.Easing.Quintic.In,
+      });
+      this.time.delayedCall(1100, () => {
+        this.spaceship!.y = 450;
+        this.fired = false;
       });
     }
   }
