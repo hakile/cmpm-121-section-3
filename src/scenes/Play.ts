@@ -9,6 +9,7 @@ export default class Play extends Phaser.Scene {
 
   starfield?: Phaser.GameObjects.TileSprite;
   spaceship?: Phaser.GameObjects.Shape;
+  enemies?: Phaser.GameObjects.Shape[];
 
   moveSpeed = 0.3;
   fired?: boolean;
@@ -42,32 +43,62 @@ export default class Play extends Phaser.Scene {
       )
       .setOrigin(0, 0);
 
-    this.spaceship = this.add.rectangle(295, 450, 50, 50, 0x00bf00);
+    this.spaceship = this.add.rectangle(295, 462.5, 25, 25, 0x00bf00);
+    this.enemies = [
+      this.add.rectangle(740, 177.5, 25, 25, 0xbf0000),
+      this.add.rectangle(790, 227.5, 25, 25, 0xbf0000),
+      this.add.rectangle(840, 277.5, 25, 25, 0xbf0000),
+    ];
     this.fired = false;
+
+    this.physics.add.existing(this.spaceship, false);
+    this.enemies.forEach((enemy) => {
+      enemy.state = 3;
+      this.physics.add.existing(enemy, false);
+      this.physics.add.overlap(this.spaceship!, enemy, () => {
+        enemy!.x = 840;
+        if (typeof enemy.state == "number") enemy.state += 1;
+      });
+    });
   }
 
   update(_: number, delta: number) {
     this.starfield!.tilePositionX -= 4;
+    this.enemies?.forEach((enemy) => {
+      if (typeof enemy.state == "number") enemy.x -= Math.min(10, enemy.state);
+      if (enemy.x < -200) enemy.x += 1040;
+    });
 
-    if (this.left!.isDown && !this.fired && this.spaceship!.x > 30) {
+    if (this.left!.isDown && !this.fired) {
       this.spaceship!.x -= delta * this.moveSpeed;
+      if (this.spaceship!.x < 17.5) {
+        this.spaceship!.x = 17.5;
+      }
     }
-    if (this.right!.isDown && !this.fired && this.spaceship!.x < 610) {
+    if (this.right!.isDown && !this.fired) {
       this.spaceship!.x += delta * this.moveSpeed;
+      if (this.spaceship!.x > 622.5) {
+        this.spaceship!.x = 622.5;
+      }
     }
 
     if (this.fire!.isDown && !this.fired) {
       this.fired = true;
       this.tweens.add({
         targets: this.spaceship,
-        y: { from: 450, to: -25 },
-        duration: 1000,
-        ease: Phaser.Math.Easing.Quintic.In,
+        y: { from: 462.5, to: -15 },
+        duration: 500,
+        ease: Phaser.Math.Easing.Quadratic.In,
       });
-      this.time.delayedCall(1100, () => {
-        this.spaceship!.y = 450;
-        this.fired = false;
+      this.time.delayedCall(750, () => {
+        this.tweens.add({
+          targets: this.spaceship,
+          y: { from: 495, to: 462.5 },
+          duration: 500,
+          ease: Phaser.Math.Easing.Quintic.Out,
+        });
       });
+      this.time.delayedCall(1250, () => (this.fired = false));
     }
   }
 }

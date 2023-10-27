@@ -5,6 +5,7 @@ import Play from "./scenes/Play";
 const config: Phaser.Types.Core.GameConfig = {
   width: 640,
   height: 480,
+  physics: { default: "arcade" },
   scene: [Menu, Play],
 };
 
